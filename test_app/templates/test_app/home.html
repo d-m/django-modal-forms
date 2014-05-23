@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Welcome!</title>
+        {% block css %}
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+        {% endblock css %}
+    </head>
+    <body>
+        <div class="navbar navbar-inverse" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                <a class="navbar-brand" href="{% url 'home' %}">Django Modal Forms</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <form class="navbar-form navbar-right" role="form">
+                        <div class="form-group">
+                            <input type="text" placeholder="Email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" placeholder="Password" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-success">Sign in</button>
+                    </form>
+                </div>
+            </div>
+        </div> 
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="container">
+            {% block content %}
+            <div class="jumbotron">
+                <h1>How's it going?</h1>
+                <p>This is a big, gray box! <a href="{% url 'test-form' %}">Leave a comment</a>!</p>
+                <button id="comment-button" class="btn btn-large">Or click here!</button>
+            </div>
+            {% endblock content %}
+            <hr>
+            {% block footer %}
+            <footer>
+                <p>Some text</p>
+            </footer>
+            {% endblock footer %}
+        </div>
+        <div id="form-modal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Modal title</h4>
+                    </div>
+                    <div id="form-modal-body" class="modal-body">
+                        <p>One fine body&hellip;</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal --> 
+        {% block js %}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script>
+            var formAjaxSubmit = function(form, modal) {
+                $(form).submit(function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        type: $(this).attr('method'),
+                        url: $(this).attr('action'),
+                        data: $(this).serialize(),
+                        success: function (xhr, ajaxOptions, thrownError) {
+                            if ( $(xhr).find('.has-error').length > 0 ) {
+                                $(modal).find('.modal-body').html(xhr);
+                                formAjaxSubmit(form, modal);
+                            } else {
+                                $(modal).modal('toggle');
+                            }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                        }
+                    });
+                });
+            }
+            $('#comment-button').click(function() {
+                $('#form-modal-body').load('/test-form/', function () {
+                    $('#form-modal').modal('toggle');
+                    formAjaxSubmit('#form-modal-body form', '#form-modal');
+                });
+            });
+        </script>
+        {% endblock js %}
+    </body>
+</html>
